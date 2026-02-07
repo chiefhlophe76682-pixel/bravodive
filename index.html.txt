@@ -1,0 +1,2314 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="BravoDrive - The smarter ride platform for Eswatini">
+  <meta name="theme-color" content="#000000">
+  <title>BravoDrive - Ride Smarter in Eswatini</title>
+  <link rel="stylesheet" href="https://leaflet.js.org/download.js">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #ffffff;
+            box-sizing: border-box;
+        }
+
+        .app-container {
+            height: 100%;
+            width: 100%;
+            display: flex;
+            overflow: hidden;
+            background: #f8f8f8;
+        }
+
+        /* AUTH SCREENS */
+        .auth-screen {
+            display: flex;
+            height: 100%;
+            width: 100%;
+        }
+
+        .auth-screen.hidden {
+            display: none;
+        }
+
+        .auth-left {
+            flex: 1;
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 40px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-left::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255,193,7,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .auth-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .auth-logo {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 24px;
+            letter-spacing: -2px;
+        }
+
+        .auth-logo span {
+            color: #ffc107;
+        }
+
+        .auth-tagline {
+            font-size: 18px;
+            color: #aaaaaa;
+            margin-bottom: 48px;
+            line-height: 1.6;
+        }
+
+        .auth-features {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            margin-top: 48px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .feature-icon {
+            font-size: 32px;
+            min-width: 40px;
+        }
+
+        .feature-text {
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .feature-text strong {
+            display: block;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .auth-right {
+            flex: 1;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .auth-form-container {
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .auth-form-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+        }
+
+        .auth-form-subtitle {
+            font-size: 14px;
+            color: #999999;
+            margin-bottom: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.2s;
+            background: white;
+            color: #1a1a1a;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #ffc107;
+            box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.1);
+            background: white;
+        }
+
+        .form-group input::placeholder {
+            color: #cccccc;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .user-type-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .user-type-btn {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: #666666;
+            transition: all 0.2s;
+        }
+
+        .user-type-btn:hover {
+            border-color: #ffc107;
+        }
+
+        .user-type-btn.active {
+            background: #ffc107;
+            color: white;
+            border-color: #ffc107;
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 8px;
+            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+        }
+
+        .auth-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 193, 7, 0.4);
+        }
+
+        .auth-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 13px;
+            color: #999999;
+        }
+
+        .auth-footer a {
+            color: #ffc107;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .driver-info-section {
+            background: #fff8e1;
+            border-left: 4px solid #ffc107;
+            padding: 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .driver-info-section h4 {
+            color: #92400e;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .driver-info-section p {
+            color: #b45309;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        /* MAIN APP */
+        .main-app {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        .main-app.hidden {
+            display: none;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: white;
+            border-right: 1px solid #eeeeee;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid #eeeeee;
+        }
+
+        .sidebar-logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: #1a1a1a;
+            letter-spacing: -1px;
+        }
+
+        .sidebar-logo span {
+            color: #ffc107;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 20px 0;
+        }
+
+        .nav-item {
+            padding: 14px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #666666;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-item:hover {
+            background: #f5f5f5;
+            color: #1a1a1a;
+        }
+
+        .nav-item.active {
+            background: #fff8e1;
+            color: #ffc107;
+            border-left-color: #ffc107;
+        }
+
+        .nav-icon {
+            font-size: 18px;
+        }
+
+        .sidebar-user {
+            padding: 20px;
+            border-top: 1px solid #eeeeee;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1a1a1a;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-type {
+            font-size: 12px;
+            color: #999999;
+        }
+
+        .logout-btn {
+            padding: 8px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            color: #e0e0e0;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            color: #ff6b6b;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .content-header {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f8f8 100%);
+            padding: 24px 32px;
+            border-bottom: 2px solid #eeeeee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+        }
+
+        .content-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1a1a1a;
+            letter-spacing: -0.5px;
+        }
+
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid #eeeeee;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #999999;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .card-container {
+            background: white;
+            border-radius: 12px;
+            padding: 28px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            border: 1px solid #eeeeee;
+            margin-bottom: 24px;
+            transition: all 0.3s;
+        }
+
+        .card-container:hover {
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f8f8f8;
+            padding: 16px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 700;
+            color: #666666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #eeeeee;
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid #eeeeee;
+            font-size: 14px;
+            color: #333333;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: #f8f8f8;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-badge.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-badge.active {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-badge.offline {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+            color: white;
+            box-shadow: 0 4px 16px rgba(255, 193, 7, 0.25);
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(255, 193, 7, 0.35);
+        }
+
+        .btn-primary:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #1a1a1a;
+            border: 1.5px solid #e0e0e0;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: #eeeeee;
+            border-color: #ffc107;
+            color: #1a1a1a;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ffc107;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            padding: 16px;
+            background: #fee2e2;
+            color: #991b1b;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 13px;
+        }
+
+        .success-message {
+            padding: 16px;
+            background: #d1fae5;
+            color: #065f46;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 13px;
+        }
+
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .payment-method-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .payment-method-card:hover {
+            border-color: #ffc107;
+            background: #fff8e1;
+        }
+
+        .payment-method-card.selected {
+            border-color: #ffc107;
+            background: #ffc107;
+            color: white;
+        }
+
+        .payment-method-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .payment-method-name {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        .driver-card {
+            background: white;
+            border: 1px solid #eeeeee;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .driver-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .driver-info {
+            flex: 1;
+        }
+
+        .driver-name {
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        .driver-details {
+            font-size: 12px;
+            color: #666666;
+            margin-bottom: 4px;
+        }
+
+        .driver-rating {
+            font-size: 12px;
+            color: #ffc107;
+        }
+
+        .driver-status-online {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .driver-status-offline {
+            color: #999999;
+            font-weight: 600;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: white;
+            border-radius: 12px;
+            padding: 28px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 16px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999999;
+        }
+
+        .notification-toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: white;
+            border-radius: 8px;
+            padding: 16px 24px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            z-index: 3000;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        #map {
+            width: 100%;
+            height: 400px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .map-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .map-controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .map-location-btn {
+            flex: 1;
+            padding: 12px;
+            background: #e0e0e0;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .map-location-btn:hover {
+            background: #ffc107;
+            color: white;
+        }
+
+        .map-location-btn.active {
+            background: #ffc107;
+            color: white;
+        }
+
+        .payment-section {
+            background: linear-gradient(135deg, #fff8e1 0%, #fffbf0 100%);
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .payment-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 16px;
+        }
+
+        .payment-summary {
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            border: 1px solid #ffc107;
+        }
+
+        .payment-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            font-size: 14px;
+        }
+
+        .payment-row.total {
+            border-top: 2px solid #eeeeee;
+            padding-top: 12px;
+            margin-top: 12px;
+            font-weight: 700;
+            font-size: 16px;
+            color: #1a1a1a;
+        }
+
+        .payment-methods-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .payment-option {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .payment-option:hover {
+            border-color: #ffc107;
+            background: #fff8e1;
+        }
+
+        .payment-option.selected {
+            border-color: #ffc107;
+            background: #ffc107;
+            color: white;
+        }
+
+        .payment-icon {
+            font-size: 28px;
+            margin-bottom: 6px;
+        }
+
+        .payment-label {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .ride-status-live {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid #10b981;
+        }
+
+        .ride-status-header {
+            font-size: 16px;
+            font-weight: 700;
+            color: #10b981;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ride-status-item {
+            padding: 12px;
+            background: #f0fdf4;
+            border-left: 3px solid #10b981;
+            margin-bottom: 12px;
+            border-radius: 4px;
+        }
+
+        .ride-status-label {
+            font-size: 12px;
+            color: #666666;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .ride-status-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .commission-badge {
+            background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+            margin-left: 8px;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 240px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .auth-screen {
+                flex-direction: column;
+            }
+
+            .auth-left {
+                display: none;
+            }
+
+            .auth-right {
+                flex: 1;
+            }
+
+            .main-app {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid #eeeeee;
+                flex-direction: row;
+                overflow-x: auto;
+            }
+
+            .sidebar-nav {
+                display: flex;
+                padding: 0;
+                gap: 0;
+                overflow-x: auto;
+            }
+
+            .nav-item {
+                flex-shrink: 0;
+                border-left: none;
+                border-bottom: 3px solid transparent;
+            }
+
+            .nav-item.active {
+                border-left: none;
+                border-bottom-color: #ffc107;
+            }
+
+            .sidebar-user {
+                display: none;
+            }
+
+            .main-content {
+                flex: 1;
+            }
+
+            .content-area {
+                padding: 16px;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="app-container"><!-- AUTH SCREEN -->
+   <div class="auth-screen" id="authScreen">
+    <div class="auth-left">
+     <div class="auth-content">
+      <div class="auth-logo">
+       Bravo<span>Drive</span>
+      </div>
+      <div class="auth-tagline">
+       The Smarter Ride Platform<br>
+       For Eswatini
+      </div>
+      <div class="auth-features">
+       <div class="feature-item">
+        <div class="feature-icon">
+         ⚡
+        </div>
+        <div class="feature-text"><strong>Fast Matching</strong> Get connected instantly
+        </div>
+       </div>
+       <div class="feature-item">
+        <div class="feature-icon">
+         🔒
+        </div>
+        <div class="feature-text"><strong>Always Reliable</strong> 24/7 platform
+        </div>
+       </div>
+       <div class="feature-item">
+        <div class="feature-icon">
+         💰
+        </div>
+        <div class="feature-text"><strong>Fair Pricing</strong> No hidden fees
+        </div>
+       </div>
+      </div>
+     </div>
+    </div>
+    <div class="auth-right">
+     <div class="auth-form-container"><!-- LOGIN TAB -->
+      <div id="loginTab" style="display: block;">
+       <h2 class="auth-form-title">Login</h2>
+       <p class="auth-form-subtitle">Welcome back to BravoDrive</p>
+       <div id="loginError" class="error-message" style="display: none;"></div>
+       <div class="user-type-selector"><button class="user-type-btn active" data-type="passenger" onclick="selectAuthUserType('passenger')"> 👤 Passenger </button> <button class="user-type-btn" data-type="driver" onclick="selectAuthUserType('driver')"> 🚗 Driver </button> <button class="user-type-btn" data-type="owner" onclick="selectAuthUserType('owner')"> 💼 Owner </button>
+       </div>
+       <form onsubmit="handleLogin(event)">
+        <div class="form-group"><label for="loginEmail">Email Address</label> <input type="email" id="loginEmail" placeholder="example@email.com" required>
+        </div>
+        <div class="form-group"><label for="loginPassword">Password</label> <input type="password" id="loginPassword" placeholder="••••••••" required>
+        </div><button type="submit" class="auth-btn" id="loginButton"> Login </button>
+       </form>
+       <div class="auth-footer">
+        Don't have an account? <a onclick="switchAuthTab('signup')">Sign up</a>
+       </div>
+      </div><!-- SIGNUP TAB -->
+      <div id="signupTab" style="display: none;">
+       <h2 class="auth-form-title">Create Account</h2>
+       <p class="auth-form-subtitle">Join BravoDrive today</p>
+       <div id="signupError" class="error-message" style="display: none;"></div>
+       <div class="user-type-selector"><button class="user-type-btn active" data-type="passenger" onclick="selectAuthUserType('passenger')"> 👤 Passenger </button> <button class="user-type-btn" data-type="driver" onclick="selectAuthUserType('driver')"> 🚗 Driver </button> <button class="user-type-btn" data-type="owner" onclick="selectAuthUserType('owner')"> 💼 Owner </button>
+       </div><!-- PASSENGER SIGNUP -->
+       <form id="passengerSignupForm" onsubmit="handleSignup(event)" style="display: block;">
+        <div class="form-group"><label for="signupName">Full Name</label> <input type="text" id="signupName" placeholder="John Dlamini" required>
+        </div>
+        <div class="form-group"><label for="signupEmail">Email Address</label> <input type="email" id="signupEmail" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group"><label for="signupPhone">Phone Number</label> <input type="tel" id="signupPhone" placeholder="+268 7612 3456" required>
+        </div>
+        <div class="form-group"><label for="signupPassword">Password</label> <input type="password" id="signupPassword" placeholder="••••••••" required>
+        </div>
+        <div class="form-group"><label for="signupConfirmPassword">Confirm Password</label> <input type="password" id="signupConfirmPassword" placeholder="••••••••" required>
+        </div><button type="submit" class="auth-btn">Create Account</button>
+       </form><!-- OWNER SIGNUP -->
+       <form id="ownerSignupForm" onsubmit="handleSignup(event)" style="display: none;">
+        <div class="driver-info-section">
+         <h4>💼 Owner Account</h4>
+         <p>Manage your BravoDrive platform and earn commissions</p>
+        </div>
+        <div class="form-group"><label for="ownerName">Full Name</label> <input type="text" id="ownerName" placeholder="Business Owner Name" required>
+        </div>
+        <div class="form-group"><label for="ownerEmail">Email Address</label> <input type="email" id="ownerEmail" placeholder="owner@email.com" required>
+        </div>
+        <div class="form-group"><label for="ownerPhone">Phone Number</label> <input type="tel" id="ownerPhone" placeholder="+268 7612 3456" required>
+        </div>
+        <div class="form-group"><label for="ownerPassword">Password</label> <input type="password" id="ownerPassword" placeholder="••••••••" required>
+        </div>
+        <div class="form-group"><label for="ownerConfirmPassword">Confirm Password</label> <input type="password" id="ownerConfirmPassword" placeholder="••••••••" required>
+        </div><button type="submit" class="auth-btn">Create Owner Account</button>
+       </form><!-- DRIVER SIGNUP -->
+       <form id="driverSignupForm" onsubmit="handleSignup(event)" style="display: none;">
+        <div class="driver-info-section">
+         <h4>🚗 Driver Registration</h4>
+         <p>Complete your profile to start earning with BravoDrive</p>
+        </div>
+        <div class="form-group"><label for="driverName">Full Name</label> <input type="text" id="driverName" placeholder="John Dlamini" required>
+        </div>
+        <div class="form-group"><label for="driverEmail">Email Address</label> <input type="email" id="driverEmail" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group"><label for="driverPhone">Phone Number</label> <input type="tel" id="driverPhone" placeholder="+268 7612 3456" required>
+        </div>
+        <div class="form-group"><label for="driverLicense">Driver License Number</label> <input type="text" id="driverLicense" placeholder="DL-1234567" required>
+        </div>
+        <div class="form-row">
+         <div class="form-group"><label for="vehicleType">Vehicle Type</label> <select id="vehicleType" required> <option value="">Select vehicle</option> <option value="Sedan">Sedan</option> <option value="SUV">SUV</option> <option value="Hatchback">Hatchback</option> <option value="Van">Van</option> </select>
+         </div>
+         <div class="form-group"><label for="vehiclePlate">License Plate</label> <input type="text" id="vehiclePlate" placeholder="AB-1234" required>
+         </div>
+        </div>
+        <div class="form-row">
+         <div class="form-group"><label for="baseFare">Base Fare (E)</label> <input type="number" id="baseFare" placeholder="50" min="10" step="5" required>
+         </div>
+         <div class="form-group"><label for="perKmRate">Per KM Rate (E)</label> <input type="number" id="perKmRate" placeholder="15" min="5" step="1" required>
+         </div>
+        </div>
+        <div class="form-group"><label for="driverReceiverAccount">Receiver Account (Mobile Money)</label> <input type="text" id="driverReceiverAccount" placeholder="+268 XXXX XXXX" required>
+        </div>
+        <div class="form-group"><label for="driverPassword">Password</label> <input type="password" id="driverPassword" placeholder="••••���•••" required>
+        </div>
+        <div class="form-group"><label for="driverConfirmPassword">Confirm Password</label> <input type="password" id="driverConfirmPassword" placeholder="••••••••" required>
+        </div><button type="submit" class="auth-btn">Register as Driver</button>
+       </form>
+       <div class="auth-footer">
+        Already have account? <a onclick="switchAuthTab('login')">Login</a>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div><!-- MAIN APP -->
+   <div class="main-app hidden" id="mainApp"><!-- SIDEBAR -->
+    <div class="sidebar">
+     <div class="sidebar-header">
+      <div class="sidebar-logo">
+       Bravo<span>Drive</span>
+      </div>
+     </div>
+     <div class="sidebar-nav">
+      <div class="nav-item active" data-view="dashboard" onclick="switchView('dashboard')"><span class="nav-icon">📊</span> <span>Dashboard</span>
+      </div>
+      <div class="nav-item passenger-only" data-view="book" onclick="switchView('book')"><span class="nav-icon">🎯</span> <span>Book Ride</span>
+      </div>
+      <div class="nav-item driver-only" data-view="drive" onclick="switchView('drive')" style="display: none;"><span class="nav-icon">🚗</span> <span>Drive</span>
+      </div>
+      <div class="nav-item" data-view="rides" onclick="switchView('rides')"><span class="nav-icon">📋</span> <span>My Rides</span>
+      </div>
+      <div class="nav-item owner-only" data-view="owner" onclick="switchView('owner')" style="display: none;"><span class="nav-icon">💼</span> <span>Owner Dashboard</span>
+      </div>
+      <div class="nav-item" data-view="earnings" onclick="switchView('earnings')"><span class="nav-icon">💵</span> <span>Earnings</span>
+      </div>
+      <div class="nav-item" data-view="settings" onclick="switchView('settings')"><span class="nav-icon">⚙️</span> <span>Settings</span>
+      </div>
+     </div>
+     <div class="sidebar-user">
+      <div class="user-avatar" id="userInitial">
+       U
+      </div>
+      <div class="user-info">
+       <div class="user-name" id="userName">
+        User
+       </div>
+       <div class="user-type" id="userType">
+        Passenger
+       </div>
+      </div><button class="logout-btn" onclick="handleLogout()">🚪</button>
+     </div>
+    </div><!-- MAIN CONTENT -->
+    <div class="main-content">
+     <div class="content-header">
+      <div class="content-title" id="contentTitle">
+       Dashboard
+      </div>
+     </div>
+     <div class="content-area"><!-- DASHBOARD VIEW -->
+      <div class="view active" id="dashboard">
+       <div class="dashboard-grid">
+        <div class="stat-card">
+         <div class="stat-icon">
+          🎯
+         </div>
+         <div class="stat-label">
+          Total Rides
+         </div>
+         <div class="stat-value" id="totalRides">
+          0
+         </div>
+        </div>
+        <div class="stat-card">
+         <div class="stat-icon">
+          💰
+         </div>
+         <div class="stat-label">
+          Wallet Balance
+         </div>
+         <div class="stat-value" id="walletBalance">
+          E0
+         </div>
+        </div>
+        <div class="stat-card driver-only" style="display: none;">
+         <div class="stat-icon">
+          ⭐
+         </div>
+         <div class="stat-label">
+          Driver Rating
+         </div>
+         <div class="stat-value" id="driverRating">
+          5.0
+         </div>
+        </div>
+        <div class="stat-card driver-only" style="display: none;">
+         <div class="stat-icon">
+          📍
+         </div>
+         <div class="stat-label">
+          Current Status
+         </div>
+         <div class="stat-value" id="driverCurrentStatus" style="font-size: 16px;">
+          🔴 Offline
+         </div>
+        </div>
+       </div>
+       <div class="card-container">
+        <div class="card-title">
+         🚗 Recent Activity
+        </div>
+        <table>
+         <thead>
+          <tr>
+           <th>Date</th>
+           <th>Details</th>
+           <th>Amount</th>
+           <th>Status</th>
+          </tr>
+         </thead>
+         <tbody id="activityTableBody">
+          <tr>
+           <td colspan="4" style="text-align: center; color: #999;">No activity yet</td>
+          </tr>
+         </tbody>
+        </table>
+       </div>
+      </div><!-- OWNER DASHBOARD VIEW -->
+      <div class="view owner-only" id="owner" style="display: none;">
+       <div class="dashboard-grid">
+        <div class="stat-card">
+         <div class="stat-icon">
+          💵
+         </div>
+         <div class="stat-label">
+          Your Commission (10%)
+         </div>
+         <div class="stat-value" id="totalCommission">
+          E0
+         </div>
+        </div>
+        <div class="stat-card">
+         <div class="stat-icon">
+          🚗
+         </div>
+         <div class="stat-label">
+          Total Rides
+         </div>
+         <div class="stat-value" id="ownerTotalRides">
+          0
+         </div>
+        </div>
+        <div class="stat-card">
+         <div class="stat-icon">
+          💼
+         </div>
+         <div class="stat-label">
+          Active Drivers
+         </div>
+         <div class="stat-value" id="activeDriversCount">
+          0
+         </div>
+        </div>
+        <div class="stat-card">
+         <div class="stat-icon">
+          👥
+         </div>
+         <div class="stat-label">
+          Total Users
+         </div>
+         <div class="stat-value" id="totalUsersCount">
+          0
+         </div>
+        </div>
+       </div>
+       <div class="card-container">
+        <div class="card-title">
+         📊 Commission Transactions
+        </div>
+        <table>
+         <thead>
+          <tr>
+           <th>Date</th>
+           <th>Driver</th>
+           <th>Total Fare</th>
+           <th>Your Commission (10%)</th>
+           <th>Driver Gets (90%)</th>
+          </tr>
+         </thead>
+         <tbody id="commissionTableBody">
+          <tr>
+           <td colspan="5" style="text-align: center; color: #999;">No transactions yet</td>
+          </tr>
+         </tbody>
+        </table>
+       </div>
+      </div><!-- BOOK RIDE VIEW (PASSENGER) -->
+      <div class="view passenger-only" id="book" style="display: none;">
+       <div class="map-section">
+        <div class="card-title">
+         🗺️ Select Locations
+        </div>
+        <div class="map-controls"><button class="map-location-btn active" id="pickupBtn" onclick="focusPickup()">📍 Pickup</button> <button class="map-location-btn" id="destBtn" onclick="focusDestination()">🚩 Destination</button>
+        </div>
+        <div id="map"></div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+         <div style="padding: 12px; background: #f0f9ff; border-radius: 8px; border-left: 3px solid #0ea5e9;">
+          <div style="font-size: 12px; color: #666; margin-bottom: 4px;">
+           📍 PICKUP
+          </div>
+          <div id="pickupDisplay" style="font-size: 13px; font-weight: 600; color: #1a1a1a;">
+           Tap on map
+          </div>
+         </div>
+         <div style="padding: 12px; background: #fef3c7; border-radius: 8px; border-left: 3px solid #f59e0b;">
+          <div style="font-size: 12px; color: #666; margin-bottom: 4px;">
+           🚩 DESTINATION
+          </div>
+          <div id="destDisplay" style="font-size: 13px; font-weight: 600; color: #1a1a1a;">
+           Tap on map
+          </div>
+         </div>
+        </div>
+       </div>
+       <div class="card-container">
+        <div class="card-title">
+         💰 Fare Estimate
+        </div>
+        <div class="payment-section">
+         <div class="payment-summary">
+          <div class="payment-row"><span>Base Fare</span> <span id="baseFareDisplay">E0</span>
+          </div>
+          <div class="payment-row"><span id="distanceLabel">Distance (0 KM)</span> <span id="distanceFareDisplay">E0</span>
+          </div>
+          <div class="payment-row total"><span>Total Estimate</span> <span id="totalEstimate">E0</span>
+          </div>
+         </div>
+         <div class="payment-title">
+          💳 Payment Method
+         </div>
+         <div class="payment-methods-grid">
+          <div class="payment-option selected" data-payment="wallet" onclick="selectPaymentMethod('wallet')">
+           <div class="payment-icon">
+            ��
+           </div>
+           <div class="payment-label">
+            Wallet
+           </div>
+          </div>
+          <div class="payment-option" data-payment="mobile" onclick="selectPaymentMethod('mobile')">
+           <div class="payment-icon">
+            📱
+           </div>
+           <div class="payment-label">
+            Mobile Money
+           </div>
+          </div>
+          <div class="payment-option" data-payment="cash" onclick="selectPaymentMethod('cash')">
+           <div class="payment-icon">
+            💵
+           </div>
+           <div class="payment-label">
+            Cash
+           </div>
+          </div>
+         </div><button class="btn btn-primary" style="width: 100%;" onclick="findDrivers()">🔍 Find Drivers</button>
+        </div>
+       </div>
+       <div class="card-container">
+        <div class="card-title">
+         👨‍💼 Available Drivers
+        </div>
+        <div id="availableDriversList">
+         <p style="text-align: center; color: #999; padding: 20px;">Select locations and find drivers</p>
+        </div>
+       </div>
+      </div><!-- DRIVE VIEW (DRIVER) -->
+      <div class="view driver-only" id="drive" style="display: none;">
+       <div class="ride-status-live" id="liveRideContainer" style="display: none;">
+        <div class="ride-status-header">
+         🟢 Active Ride in Progress
+        </div>
+        <div class="ride-status-item">
+         <div class="ride-status-label">
+          Passenger
+         </div>
+         <div class="ride-status-value" id="livePassengerName">
+          -
+         </div>
+        </div>
+        <div class="ride-status-item">
+         <div class="ride-status-label">
+          From → To
+         </div>
+         <div class="ride-status-value" id="liveRideRoute">
+          -
+         </div>
+        </div>
+        <div class="ride-status-item">
+         <div class="ride-status-label">
+          Total Fare
+         </div>
+         <div class="ride-status-value" id="liveRideTotalFare">
+          E0
+         </div>
+        </div>
+        <div class="ride-status-item">
+         <div class="ride-status-label">
+          You Receive (90%)
+         </div>
+         <div class="ride-status-value" style="color: #10b981; font-size: 18px;" id="liveRideEarning">
+          E0
+         </div>
+        </div><button class="btn btn-success" style="width: 100%; margin-top: 12px;" onclick="completeRide()">✅ Complete Ride</button>
+       </div>
+       <div class="card-container">
+        <div class="card-title">
+         📍 Driver Status
+        </div>
+        <form onsubmit="handleUpdateDriverStatus(event)">
+         <div class="form-group"><label>Your Current Status</label>
+          <div id="driverStatusDisplay" style="padding: 16px; background: #fff8e1; border-radius: 8px; margin-bottom: 16px; font-weight: 600;">
+           🔴 Offline
+          </div>
+         </div>
+         <div class="form-group"><label for="driverStatusSelect">Change Status</label> <select id="driverStatusSelect" required> <option value="offline">🔴 Go Offline</option> <option value="online">🟢 Go Online</option> </select>
+         </div><button type="submit" class="btn btn-primary" style="width: 100%;">Update Status</button>
+        </form>
+       </div>
+       <div class="card-container">
+        <div class="card-title">
+         📋 Available Ride Requests
+        </div>
+        <div id="rideRequestsList">
+         <p style="text-align: center; color: #999; padding: 20px;">Go online to receive ride requests</p>
+        </div>
+       </div>
+      </div><!-- MY RIDES VIEW -->
+      <div class="view" id="rides">
+       <div class="card-container">
+        <div class="card-title">
+         📋 My Rides
+        </div>
+        <table>
+         <thead>
+          <tr>
+           <th>Date</th>
+           <th>From → To</th>
+           <th>Amount</th>
+           <th>Status</th>
+          </tr>
+         </thead>
+         <tbody id="ridesTableBody">
+          <tr>
+           <td colspan="4" style="text-align: center; color: #999;">No rides yet</td>
+          </tr>
+         </tbody>
+        </table>
+       </div>
+      </div><!-- EARNINGS VIEW -->
+      <div class="view" id="earnings">
+       <div class="dashboard-grid">
+        <div class="stat-card">
+         <div class="stat-icon">
+          💵
+         </div>
+         <div class="stat-label">
+          Total Earnings
+         </div>
+         <div class="stat-value" id="totalEarnings">
+          E0
+         </div>
+        </div>
+        <div class="stat-card">
+         <div class="stat-icon">
+          📊
+         </div>
+         <div class="stat-label">
+          Total Completed
+         </div>
+         <div class="stat-value" id="totalCompleted">
+          0
+         </div>
+        </div>
+       </div>
+       <div class="card-container">
+        <div class="card-title">
+         💰 Earnings Breakdown
+        </div>
+        <table>
+         <thead>
+          <tr>
+           <th>Date</th>
+           <th>Trip</th>
+           <th>Total Fare</th>
+           <th>You Get (90%)</th>
+           <th>Status</th>
+          </tr>
+         </thead>
+         <tbody id="earningsTableBody">
+          <tr>
+           <td colspan="5" style="text-align: center; color: #999;">No earnings yet</td>
+          </tr>
+         </tbody>
+        </table>
+       </div>
+      </div><!-- SETTINGS VIEW -->
+      <div class="view" id="settings">
+       <div class="card-container">
+        <div class="card-title">
+         👤 Account Settings
+        </div>
+        <form onsubmit="handleSettingsSubmit(event)">
+         <div class="form-group"><label for="settingName">Full Name</label> <input type="text" id="settingName" placeholder="Your Name" required>
+         </div>
+         <div class="form-group"><label for="settingEmail">Email Address</label> <input type="email" id="settingEmail" placeholder="example@email.com" required>
+         </div>
+         <div class="form-group"><label for="settingPhone">Phone Number</label> <input type="tel" id="settingPhone" placeholder="+268 XXXX XXXX" required>
+         </div><button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 16px;">Save Changes</button>
+        </form>
+       </div>
+       <div class="card-container driver-only" style="display: none;">
+        <div class="card-title">
+         🚙 Driver Information
+        </div>
+        <form onsubmit="handleUpdateDriverInfo(event)">
+         <div class="form-group"><label for="settingLicense">Driver License</label> <input type="text" id="settingLicense" required>
+         </div>
+         <div class="form-row">
+          <div class="form-group"><label for="settingVehicle">Vehicle Type</label> <input type="text" id="settingVehicle" required>
+          </div>
+          <div class="form-group"><label for="settingPlate">License Plate</label> <input type="text" id="settingPlate" required>
+          </div>
+         </div>
+         <div class="form-row">
+          <div class="form-group"><label for="settingBaseFare">Base Fare (E)</label> <input type="number" id="settingBaseFare" required>
+          </div>
+          <div class="form-group"><label for="settingPerKm">Per KM Rate (E)</label> <input type="number" id="settingPerKm" required>
+          </div>
+         </div>
+         <div class="form-group"><label for="settingReceiverAccount">Receiver Account (Mobile Money)</label> <input type="text" id="settingReceiverAccount" required>
+         </div><button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 16px;">Update Info</button>
+        </form>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div><!-- RIDE MODAL -->
+  <div class="modal-overlay" id="rideModal">
+   <div class="modal-box">
+    <div class="modal-title" id="rideModalTitle">
+     Ride Details
+    </div><button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="rideModalContent"></div>
+    <div class="button-group" style="margin-top: 24px;"><button class="btn btn-primary" onclick="confirmRide()" style="flex: 1;">Confirm</button> <button class="btn btn-secondary" onclick="closeModal()" style="flex: 1;">Cancel</button>
+    </div>
+   </div>
+  </div>
+  <script>
+        let currentUser = null;
+        let authUserType = 'passenger';
+        let allUsers = [];
+        let allRides = [];
+        let currentRideBooking = null;
+        let selectedPaymentMethod = 'wallet';
+        let map = null;
+        let pickupMarker = null;
+        let destMarker = null;
+        let pickupLocation = null;
+        let destLocation = null;
+        let currentMapMode = 'pickup';
+        let activeRide = null;
+        let ownerAccount = 'owner@bravodrive.com';
+
+        function loadAllUsers() {
+            const stored = localStorage.getItem('bravodrive_users');
+            allUsers = stored ? JSON.parse(stored) : [];
+        }
+
+        function saveUsers() {
+            localStorage.setItem('bravodrive_users', JSON.stringify(allUsers));
+        }
+
+        function loadAllRides() {
+            const stored = localStorage.getItem('bravodrive_rides');
+            allRides = stored ? JSON.parse(stored) : [];
+        }
+
+        function saveRides() {
+            localStorage.setItem('bravodrive_rides', JSON.stringify(allRides));
+        }
+
+        function initMap() {
+            map = L.map('map').setView([-26.5225, 31.4659], 12);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap',
+                maxZoom: 19
+            }).addTo(map);
+
+            map.on('click', function(e) {
+                const lat = e.latlng.lat;
+                const lng = e.latlng.lng;
+                
+                if (currentMapMode === 'pickup') {
+                    pickupLocation = { lat, lng };
+                    if (pickupMarker) map.removeLayer(pickupMarker);
+                    pickupMarker = L.marker([lat, lng], {
+                        icon: L.icon({
+                            iconUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSI4IiBmaWxsPSIjMzFiNmQ1Ii8+PC9zdmc+',
+                            iconSize: [32, 32],
+                            iconAnchor: [16, 16]
+                        })
+                    }).addTo(map);
+                    document.getElementById('pickupDisplay').textContent = `📍 ${lat.toFixed(3)}, ${lng.toFixed(3)}`;
+                    calculateFare();
+                } else {
+                    destLocation = { lat, lng };
+                    if (destMarker) map.removeLayer(destMarker);
+                    destMarker = L.marker([lat, lng], {
+                        icon: L.icon({
+                            iconUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSI4IiBmaWxsPSIjZjU5ZTBiIi8+PC9zdmc+',
+                            iconSize: [32, 32],
+                            iconAnchor: [16, 16]
+                        })
+                    }).addTo(map);
+                    document.getElementById('destDisplay').textContent = `🚩 ${lat.toFixed(3)}, ${lng.toFixed(3)}`;
+                    calculateFare();
+                }
+            });
+        }
+
+        function focusPickup() {
+            currentMapMode = 'pickup';
+            document.getElementById('pickupBtn').classList.add('active');
+            document.getElementById('destBtn').classList.remove('active');
+        }
+
+        function focusDestination() {
+            currentMapMode = 'destination';
+            document.getElementById('pickupBtn').classList.remove('active');
+            document.getElementById('destBtn').classList.add('active');
+        }
+
+        function calculateDistance() {
+            if (!pickupLocation || !destLocation) return 0;
+            const R = 6371;
+            const dLat = (destLocation.lat - pickupLocation.lat) * Math.PI / 180;
+            const dLng = (destLocation.lng - pickupLocation.lng) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + 
+                     Math.cos(pickupLocation.lat * Math.PI / 180) * Math.cos(destLocation.lat * Math.PI / 180) *
+                     Math.sin(dLng/2) * Math.sin(dLng/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return (R * c).toFixed(1);
+        }
+
+        function calculateFare() {
+            if (!pickupLocation || !destLocation || !allUsers.length) return;
+            
+            const distance = calculateDistance();
+            const driver = allUsers.find(u => u.user_type === 'driver' && u.driver_status === 'online');
+            if (!driver) return;
+
+            const baseFare = driver.base_fare || 50;
+            const perKmRate = driver.per_km_rate || 15;
+            const distanceFare = distance * perKmRate;
+            const total = baseFare + distanceFare;
+
+            document.getElementById('baseFareDisplay').textContent = `E${baseFare}`;
+            document.getElementById('distanceLabel').textContent = `Distance (${distance} KM)`;
+            document.getElementById('distanceFareDisplay').textContent = `E${distanceFare.toFixed(0)}`;
+            document.getElementById('totalEstimate').textContent = `E${total.toFixed(0)}`;
+        }
+
+        function selectPaymentMethod(method) {
+            selectedPaymentMethod = method;
+            document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelector(`[data-payment="${method}"]`).classList.add('selected');
+        }
+
+        function findDrivers() {
+            if (!pickupLocation || !destLocation) {
+                showNotification('⚠️', 'Please select both pickup and destination');
+                return;
+            }
+
+            handleBookRide(new Event('custom'));
+        }
+
+        loadAllUsers();
+        loadAllRides();
+
+        setTimeout(() => {
+            initMap();
+        }, 500);
+
+        function selectAuthUserType(type) {
+            authUserType = type;
+            document.querySelectorAll('.user-type-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[data-type="${type}"]`).classList.add('active');
+
+            if (type === 'driver') {
+                document.getElementById('passengerSignupForm').style.display = 'none';
+                document.getElementById('driverSignupForm').style.display = 'block';
+                document.getElementById('ownerSignupForm').style.display = 'none';
+            } else if (type === 'owner') {
+                document.getElementById('passengerSignupForm').style.display = 'none';
+                document.getElementById('driverSignupForm').style.display = 'none';
+                document.getElementById('ownerSignupForm').style.display = 'block';
+            } else {
+                document.getElementById('passengerSignupForm').style.display = 'block';
+                document.getElementById('driverSignupForm').style.display = 'none';
+                document.getElementById('ownerSignupForm').style.display = 'none';
+            }
+        }
+
+        function switchAuthTab(tab) {
+            document.getElementById('loginTab').style.display = 'none';
+            document.getElementById('signupTab').style.display = 'none';
+            document.getElementById(tab + 'Tab').style.display = 'block';
+
+            if (tab === 'signup') {
+                authUserType = 'passenger';
+                selectAuthUserType('passenger');
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorDiv = document.getElementById('loginError');
+            const loginBtn = document.getElementById('loginButton');
+
+            if (!email || !password) {
+                showError(errorDiv, 'Please enter email and password');
+                return;
+            }
+
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<span class="loading"></span> Logging in...';
+
+            setTimeout(async () => {
+                const user = allUsers.find(u => u.email === email);
+                if (user) {
+                    currentUser = user;
+                    document.getElementById('authScreen').classList.add('hidden');
+                    document.getElementById('mainApp').classList.remove('hidden');
+                    updateUserDisplay();
+                    updateViewsForUserType();
+                    setTimeout(() => {
+                        if (map) map.invalidateSize();
+                    }, 100);
+                    showNotification('✅', 'Welcome back ' + user.name + '!');
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = 'Login';
+                } else {
+                    showError(errorDiv, 'Email not found. Please sign up first.');
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = 'Login';
+                }
+            }, 1500);
+        }
+
+        function handleSignup(e) {
+            e.preventDefault();
+
+            let name, email, phone, password, confirmPassword;
+
+            if (authUserType === 'passenger') {
+                name = document.getElementById('signupName').value;
+                email = document.getElementById('signupEmail').value;
+                phone = document.getElementById('signupPhone').value;
+                password = document.getElementById('signupPassword').value;
+                confirmPassword = document.getElementById('signupConfirmPassword').value;
+            } else {
+                name = document.getElementById('driverName').value;
+                email = document.getElementById('driverEmail').value;
+                phone = document.getElementById('driverPhone').value;
+                password = document.getElementById('driverPassword').value;
+                confirmPassword = document.getElementById('driverConfirmPassword').value;
+            }
+
+            const errorDiv = document.getElementById('signupError');
+
+            if (password !== confirmPassword) {
+                showError(errorDiv, 'Passwords do not match');
+                return;
+            }
+
+            createNewAccount();
+        }
+
+        async function createNewAccount() {
+            let userData;
+
+            if (authUserType === 'passenger') {
+                userData = {
+                    user_id: 'user_' + Math.random().toString(36).substr(2, 9),
+                    name: document.getElementById('signupName').value,
+                    email: document.getElementById('signupEmail').value,
+                    phone: document.getElementById('signupPhone').value,
+                    user_type: 'passenger',
+                    wallet_balance: 500,
+                    rating: 5.0,
+                    driver_status: '',
+                    current_location: '',
+                    trips_completed: 0,
+                    created_at: new Date().toISOString(),
+                    receiver_account: ''
+                };
+            } else if (authUserType === 'owner') {
+                userData = {
+                    user_id: 'owner_' + Math.random().toString(36).substr(2, 9),
+                    name: document.getElementById('ownerName').value,
+                    email: document.getElementById('ownerEmail').value,
+                    phone: document.getElementById('ownerPhone').value,
+                    user_type: 'owner',
+                    wallet_balance: 0,
+                    rating: 5.0,
+                    driver_status: '',
+                    current_location: '',
+                    trips_completed: 0,
+                    created_at: new Date().toISOString(),
+                    receiver_account: ''
+                };
+            } else {
+                userData = {
+                    user_id: 'driver_' + Math.random().toString(36).substr(2, 9),
+                    name: document.getElementById('driverName').value,
+                    email: document.getElementById('driverEmail').value,
+                    phone: document.getElementById('driverPhone').value,
+                    user_type: 'driver',
+                    wallet_balance: 0,
+                    rating: 5.0,
+                    driver_license: document.getElementById('driverLicense').value,
+                    vehicle_type: document.getElementById('vehicleType').value,
+                    vehicle_plate: document.getElementById('vehiclePlate').value,
+                    base_fare: parseInt(document.getElementById('baseFare').value),
+                    per_km_rate: parseInt(document.getElementById('perKmRate').value),
+                    payment_methods: 'Mobile Money',
+                    driver_status: 'online',
+                    current_location: '',
+                    trips_completed: 0,
+                    created_at: new Date().toISOString(),
+                    receiver_account: document.getElementById('driverReceiverAccount').value
+                };
+            }
+
+            // Check if email already exists
+            if (allUsers.find(u => u.email === userData.email)) {
+                showError(document.getElementById('signupError'), 'Email already registered');
+                return;
+            }
+
+            allUsers.push(userData);
+            saveUsers();
+
+            currentUser = userData;
+            document.getElementById('authScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            updateUserDisplay();
+            updateViewsForUserType();
+            setTimeout(() => {
+                if (map) map.invalidateSize();
+            }, 100);
+            
+            if (authUserType === 'driver') {
+                showNotification('🚗', 'Welcome! You\'re now online and available for rides!');
+            } else if (authUserType === 'owner') {
+                showNotification('💼', 'Welcome to the Owner Dashboard!');
+            } else {
+                showNotification('🎉', 'Welcome to BravoDrive!');
+            }
+        }
+
+        function updateUserDisplay() {
+            if (currentUser) {
+                const initial = currentUser.name.charAt(0).toUpperCase();
+                document.getElementById('userInitial').textContent = initial;
+                document.getElementById('userName').textContent = currentUser.name;
+                document.getElementById('userType').textContent = currentUser.user_type === 'driver' ? 'Driver' : 'Passenger';
+                document.getElementById('settingName').value = currentUser.name;
+                document.getElementById('settingEmail').value = currentUser.email;
+                document.getElementById('settingPhone').value = currentUser.phone;
+
+                if (currentUser.user_type === 'driver') {
+                    document.getElementById('settingLicense').value = currentUser.driver_license || '';
+                    document.getElementById('settingVehicle').value = currentUser.vehicle_type || '';
+                    document.getElementById('settingPlate').value = currentUser.vehicle_plate || '';
+                    document.getElementById('settingBaseFare').value = currentUser.base_fare || 50;
+                    document.getElementById('settingPerKm').value = currentUser.per_km_rate || 15;
+                    document.getElementById('settingReceiverAccount').value = currentUser.receiver_account || '';
+                    document.getElementById('driverStatusDisplay').textContent = currentUser.driver_status === 'online' ? '🟢 Online' : '🔴 Offline';
+                    document.getElementById('driverCurrentStatus').textContent = currentUser.driver_status === 'online' ? '🟢 Online' : '🔴 Offline';
+                }
+
+                document.getElementById('walletBalance').textContent = 'E' + (currentUser.wallet_balance || 0);
+                document.getElementById('totalRides').textContent = currentUser.trips_completed || 0;
+                document.getElementById('driverRating').textContent = (currentUser.rating || 5.0).toFixed(1);
+                document.getElementById('totalEarnings').textContent = 'E0';
+                document.getElementById('totalCompleted').textContent = currentUser.trips_completed || 0;
+
+                updateOwnerDashboard();
+            }
+        }
+
+        function updateViewsForUserType() {
+            if (currentUser.user_type === 'driver') {
+                document.querySelectorAll('.passenger-only').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('.driver-only').forEach(el => el.style.display = 'block');
+                document.querySelectorAll('.owner-only').forEach(el => el.style.display = 'none');
+                document.querySelector('[data-view="owner"]').style.display = 'none';
+            } else if (currentUser.user_type === 'owner') {
+                document.querySelectorAll('.passenger-only').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('.driver-only').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('.owner-only').forEach(el => el.style.display = 'block');
+                document.querySelector('[data-view="owner"]').style.display = 'flex';
+                document.querySelector('[data-view="book"]').style.display = 'none';
+                document.querySelector('[data-view="drive"]').style.display = 'none';
+                switchView('owner');
+            } else {
+                document.querySelectorAll('.passenger-only').forEach(el => el.style.display = 'block');
+                document.querySelectorAll('.driver-only').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('.owner-only').forEach(el => el.style.display = 'none');
+                document.querySelector('[data-view="owner"]').style.display = 'none';
+            }
+        }
+
+        function updateOwnerDashboard() {
+            const completedRides = allRides.filter(r => r.status === 'completed');
+            const totalFares = completedRides.reduce((sum, r) => sum + r.fare_amount, 0);
+            const ownerCommission = totalFares * 0.1;
+
+            document.getElementById('totalCommission').textContent = 'E' + ownerCommission.toFixed(0);
+            document.getElementById('ownerTotalRides').textContent = completedRides.length;
+            document.getElementById('activeDriversCount').textContent = allUsers.filter(u => u.user_type === 'driver' && u.driver_status === 'online').length;
+            document.getElementById('totalUsersCount').textContent = allUsers.length;
+
+            let commissionHTML = '';
+            completedRides.forEach(ride => {
+                const driver = allUsers.find(u => u.user_id === ride.driver_id);
+                const commission = ride.fare_amount * 0.1;
+                const driverEarnings = ride.fare_amount * 0.9;
+                commissionHTML += `
+                    <tr>
+                        <td>${new Date(ride.completed_at).toLocaleDateString()}</td>
+                        <td>${driver?.name || 'Unknown'}</td>
+                        <td>E${ride.fare_amount.toFixed(0)}</td>
+                        <td style="color: #10b981; font-weight: 600;">E${commission.toFixed(0)} <span class="commission-badge">+10%</span></td>
+                        <td>E${driverEarnings.toFixed(0)}</td>
+                    </tr>
+                `;
+            });
+
+            if (commissionHTML) {
+                document.getElementById('commissionTableBody').innerHTML = commissionHTML;
+            }
+        }
+
+        function switchView(viewId) {
+            document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelector(`[data-view="${viewId}"]`).classList.add('active');
+
+            const titles = {
+                'dashboard': 'Dashboard',
+                'book': 'Book a Ride',
+                'drive': 'Drive & Earn',
+                'owner': 'Owner Dashboard',
+                'rides': 'My Rides',
+                'earnings': 'Earnings',
+                'settings': 'Settings'
+            };
+            document.getElementById('contentTitle').textContent = titles[viewId] || 'Dashboard';
+
+            if (viewId === 'book' && map) {
+                setTimeout(() => map.invalidateSize(), 100);
+            }
+
+            if (viewId === 'owner') {
+                updateOwnerDashboard();
+            }
+        }
+
+        function handleBookRide(e) {
+            const distance = calculateDistance();
+            if (distance === 0) {
+                showNotification('⚠️', 'Locations not properly set');
+                return;
+            }
+
+            currentRideBooking = { 
+                pickup: pickupLocation, 
+                destination: destLocation, 
+                distance: distance
+            };
+
+            const availableDrivers = allUsers.filter(u => u.user_type === 'driver' && u.driver_status === 'online');
+
+            if (availableDrivers.length === 0) {
+                document.getElementById('availableDriversList').innerHTML = '<div class="error-message">No drivers available at the moment. Please try again later.</div>';
+                return;
+            }
+
+            let html = '';
+            availableDrivers.forEach(driver => {
+                const fare = driver.base_fare + (distance * driver.per_km_rate);
+                html += `
+                    <div class="driver-card">
+                        <div class="driver-info">
+                            <div class="driver-name">👨‍💼 ${driver.name}</div>
+                            <div class="driver-details">${driver.vehicle_type} • ${driver.vehicle_plate}</div>
+                            <div class="driver-rating">�� ${driver.rating.toFixed(1)} • E${fare.toFixed(0)}</div>
+                        </div>
+                        <button type="button" class="btn btn-primary btn-small" onclick="requestRide('${driver.user_id}', '${driver.name}', ${fare})">Book</button>
+                    </div>
+                `;
+            });
+
+            document.getElementById('availableDriversList').innerHTML = html;
+            showNotification('🔍', `Found ${availableDrivers.length} available drivers!`);
+        }
+
+        function requestRide(driverId, driverName, fare) {
+            if (currentUser.wallet_balance < fare && selectedPaymentMethod === 'wallet') {
+                showNotification('❌', 'Insufficient wallet balance');
+                return;
+            }
+
+            const ride = {
+                ride_id: 'ride_' + Math.random().toString(36).substr(2, 9),
+                passenger_id: currentUser.user_id,
+                driver_id: driverId,
+                pickup_location: `${pickupLocation.lat}, ${pickupLocation.lng}`,
+                destination: `${destLocation.lat}, ${destLocation.lng}`,
+                status: 'accepted',
+                fare_amount: fare,
+                distance_km: currentRideBooking.distance,
+                payment_method: selectedPaymentMethod,
+                created_at: new Date().toISOString(),
+                completed_at: ''
+            };
+
+            allRides.push(ride);
+            saveRides();
+            activeRide = ride;
+
+            if (selectedPaymentMethod === 'wallet') {
+                currentUser.wallet_balance -= fare;
+            }
+            currentUser.trips_completed = (currentUser.trips_completed || 0) + 1;
+
+            const driver = allUsers.find(u => u.user_id === driverId);
+            if (driver) {
+                const driverEarnings = fare * 0.9;
+                driver.wallet_balance = (driver.wallet_balance || 0) + driverEarnings;
+                driver.trips_completed = (driver.trips_completed || 0) + 1;
+            }
+
+            saveUsers();
+
+            document.getElementById('availableDriversList').innerHTML = `
+                <div class="success-message">
+                    ✅ Ride booked with ${driverName}! 
+                    <br><br>
+                    <strong>Fare Breakdown:</strong><br>
+                    Total: E${fare.toFixed(0)}<br>
+                    <span style="color: #666;">Driver Gets (90%): E${(fare * 0.9).toFixed(0)}</span><br>
+                    <span style="color: #999;">Platform Fee (10%): E${(fare * 0.1).toFixed(0)}</span>
+                </div>
+            `;
+
+            showNotification('🚗', `Ride confirmed with ${driverName}!`);
+            updateUserDisplay();
+            pickupLocation = null;
+            destLocation = null;
+            pickupMarker = null;
+            destMarker = null;
+            if (map) {
+                if (pickupMarker) map.removeLayer(pickupMarker);
+                if (destMarker) map.removeLayer(destMarker);
+            }
+        }
+
+        function handleUpdateDriverStatus(e) {
+            e.preventDefault();
+            
+            const newStatus = document.getElementById('driverStatusSelect').value;
+            currentUser.driver_status = newStatus;
+
+            document.getElementById('driverStatusDisplay').textContent = newStatus === 'online' ? '🟢 Online' : '🔴 Offline';
+            document.getElementById('driverCurrentStatus').textContent = newStatus === 'online' ? '🟢 Online' : '🔴 Offline';
+
+            if (newStatus === 'online') {
+                showRideRequests();
+                showNotification('🟢', 'You are now online! Ready to accept rides.');
+            } else {
+                document.getElementById('rideRequestsList').innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">Go online to receive ride requests</p>';
+                showNotification('🔴', 'You are now offline.');
+            }
+        }
+
+        function showRideRequests() {
+            const rideRequests = allRides.filter(r => r.driver_id === currentUser.user_id && r.status === 'accepted');
+            
+            if (rideRequests.length === 0) {
+                document.getElementById('rideRequestsList').innerHTML = '<p style="text-align: center; color: #10b981; padding: 20px;">✅ You are online and ready to receive requests!</p>';
+                return;
+            }
+
+            let html = '';
+            rideRequests.forEach(ride => {
+                const passenger = allUsers.find(u => u.user_id === ride.passenger_id);
+                html += `
+                    <div class="driver-card" style="border: 2px solid #10b981;">
+                        <div class="driver-info">
+                            <div class="driver-name">👤 ${passenger?.name || 'Unknown'}</div>
+                            <div class="driver-details">E${ride.fare_amount.toFixed(0)} • ${ride.distance_km} KM</div>
+                            <div class="driver-rating">📍 Pickup: ${ride.pickup_location}</div>
+                        </div>
+                        <button type="button" class="btn btn-success btn-small" onclick="acceptRideRequest('${ride.ride_id}')">Accept</button>
+                    </div>
+                `;
+            });
+
+            document.getElementById('rideRequestsList').innerHTML = html;
+        }
+
+        function acceptRideRequest(rideId) {
+            const ride = allRides.find(r => r.ride_id === rideId);
+            if (ride) {
+                activeRide = ride;
+                document.getElementById('liveRideContainer').style.display = 'block';
+                const passenger = allUsers.find(u => u.user_id === ride.passenger_id);
+                document.getElementById('livePassengerName').textContent = passenger?.name || 'Unknown';
+                document.getElementById('liveRideRoute').textContent = `${ride.pickup_location.split(',')[0]} → ${ride.destination.split(',')[0]}`;
+                document.getElementById('liveRideTotalFare').textContent = `E${ride.fare_amount.toFixed(0)}`;
+                document.getElementById('liveRideEarning').textContent = `E${(ride.fare_amount * 0.9).toFixed(0)}`;
+                showNotification('✅', 'Ride accepted! Head to pickup location.');
+                showRideRequests();
+            }
+        }
+
+        function completeRide() {
+            if (activeRide) {
+                activeRide.completed_at = new Date().toISOString();
+                activeRide.status = 'completed';
+                saveRides();
+                document.getElementById('liveRideContainer').style.display = 'none';
+                const driverEarnings = activeRide.fare_amount * 0.9;
+                const commission = activeRide.fare_amount * 0.1;
+                showNotification('🎉', `Ride completed! You earned E${driverEarnings.toFixed(0)} (Platform: E${commission.toFixed(0)})`);
+                activeRide = null;
+                updateUserDisplay();
+                showRideRequests();
+            }
+        }
+
+        function handleSettingsSubmit(e) {
+            e.preventDefault();
+            
+            currentUser.name = document.getElementById('settingName').value;
+            currentUser.email = document.getElementById('settingEmail').value;
+            currentUser.phone = document.getElementById('settingPhone').value;
+            
+            updateUserDisplay();
+            showNotification('✅', 'Settings saved successfully!');
+        }
+
+        function handleUpdateDriverInfo(e) {
+            e.preventDefault();
+            
+            currentUser.driver_license = document.getElementById('settingLicense').value;
+            currentUser.vehicle_type = document.getElementById('settingVehicle').value;
+            currentUser.vehicle_plate = document.getElementById('settingPlate').value;
+            currentUser.base_fare = parseInt(document.getElementById('settingBaseFare').value);
+            currentUser.per_km_rate = parseInt(document.getElementById('settingPerKm').value);
+            currentUser.receiver_account = document.getElementById('settingReceiverAccount').value;
+            
+            showNotification('✅', 'Driver information updated! 🚙');
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            activeRide = null;
+            pickupLocation = null;
+            destLocation = null;
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('authScreen').classList.remove('hidden');
+            switchAuthTab('login');
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+            showNotification('👋', 'You have been logged out.');
+        }
+
+        function closeModal() {
+            document.getElementById('rideModal').classList.remove('active');
+        }
+
+        function confirmRide() {
+            closeModal();
+            showNotification('✅', 'Ride confirmed!');
+        }
+
+        function showError(element, message) {
+            element.textContent = message;
+            element.style.display = 'block';
+        }
+
+        function showNotification(icon, message) {
+            const toast = document.createElement('div');
+            toast.className = 'notification-toast';
+            toast.innerHTML = `<strong>${icon}</strong> ${message}`;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c9f18f817d5b30e',t:'MTc3MDQyNzU3MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
